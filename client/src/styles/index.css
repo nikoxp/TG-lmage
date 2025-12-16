@@ -17,6 +17,16 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+  font-optical-sizing: auto;
+}
+
+/* 确保字体清晰渲染 */
+@media screen and (-webkit-min-device-pixel-ratio: 2), 
+       screen and (min-resolution: 192dpi) {
+  html {
+    -webkit-font-smoothing: subpixel-antialiased;
+  }
 }
 
 body {

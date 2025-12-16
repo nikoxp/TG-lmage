@@ -51,8 +51,14 @@ const useImageStore = create((set, get) => ({
       const response = await axios.get(`/api/images?${params}`);
       const { files, pagination } = response.data;
 
+      // 映射数据格式：后端返回 url，前端使用 src
+      const mappedFiles = files.map((file) => ({
+        ...file,
+        src: file.url || `/file/${file.id}`,
+      }));
+
       // 应用排序
-      const sortedFiles = get().sortImages(files);
+      const sortedFiles = get().sortImages(mappedFiles);
 
       set({
         images: sortedFiles,
