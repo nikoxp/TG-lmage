@@ -171,7 +171,7 @@ const HomePage = () => {
                   <>
                     <div className="aspect-video bg-gray-50 overflow-hidden mb-3 border border-gray-100">
                       <img
-                        src={window.location.origin + result.data.src}
+                        src={window.location.origin + result.data.src + '?raw=true'}
                         alt={result.filename}
                         className="w-full h-full object-contain"
                       />
