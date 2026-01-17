@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuthStore } from '@/store/authStore';
+import { uploadFiles } from '@/services/uploadService';
 import toast from 'react-hot-toast';
 import {
   Gear,
@@ -9,15 +10,18 @@ import {
   Warning,
   CheckSquare,
   Square,
-  LockKey
+  LockKey,
+  User,
+  Image as ImageIcon
 } from '@phosphor-icons/react';
 
 const SettingsPage = () => {
-  const { changePassword } = useAuthStore();
-  
+  const { user, changePassword, updateAvatar } = useAuthStore();
+
   const [showPasswordSection, setShowPasswordSection] = useState(false);
   const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   const [settings, setSettings] = useState({
     emailNotifications: true,
@@ -60,6 +64,36 @@ const SettingsPage = () => {
       if (window.confirm('真的吗？没法反悔的。')) {
         toast.error('还不能烧书 (功能未开放)');
       }
+    }
+  };
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('只能上传图片！');
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    try {
+      const result = await uploadFiles([file]);
+      if (result.success && result.data[0]?.success) {
+        const avatarUrl = result.data[0].data.src;
+        const updateResult = await updateAvatar(avatarUrl);
+        if (updateResult.success) {
+          toast.success('头像已更新！');
+        } else {
+          toast.error(updateResult.error);
+        }
+      } else {
+        toast.error('上传失败');
+      }
+    } catch (error) {
+      toast.error('上传出错了...');
+    } finally {
+      setIsUploadingAvatar(false);
     }
   };
 
@@ -145,6 +179,47 @@ const SettingsPage = () => {
                        <option value="private">私密 (只有我看)</option>
                      </select>
                    </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Avatar */}
+            <section>
+              <h2 className="text-2xl font-hand font-bold text-pencil mb-4 border-b-2 border-marker-green inline-block pr-4 rotate-slight-1">
+                <User className="inline mr-1" /> 个人形象
+              </h2>
+              <div className="flex items-center gap-6">
+                <div className="w-24 h-24 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 overflow-hidden flex items-center justify-center relative group">
+                  {user?.avatarUrl ? (
+                    <img
+                      src={user.avatarUrl.includes('?') ? user.avatarUrl : `${user.avatarUrl}?raw=true`}
+                      alt={user.username}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User size={48} className="text-gray-300" weight="thin" />
+                  )}
+                  {isUploadingAvatar && (
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                      <div className="text-white text-sm font-hand">上传中...</div>
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <label className="btn-doodle inline-flex items-center gap-2 cursor-pointer">
+                    <ImageIcon size={20} />
+                    <span>{user?.avatarUrl ? '更换头像' : '上传头像'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleAvatarUpload}
+                      disabled={isUploadingAvatar}
+                    />
+                  </label>
+                  <p className="font-hand text-sm text-gray-400 mt-2">
+                    支持 JPG、PNG、GIF 等格式
+                  </p>
                 </div>
               </div>
             </section>

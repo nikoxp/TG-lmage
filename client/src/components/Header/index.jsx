@@ -59,7 +59,7 @@ const Header = memo(() => {
             >
               <div className="w-8 h-8 rounded-full bg-gray-200 border border-gray-400 overflow-hidden">
                 {user?.avatarUrl ? (
-                  <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" />
+                  <img src={user.avatarUrl.includes('?') ? user.avatarUrl : `${user.avatarUrl}?raw=true`} alt={user.username} className="w-full h-full object-cover" />
                 ) : (
                   <User size={24} className="m-auto mt-1 text-gray-500" />
                 )}

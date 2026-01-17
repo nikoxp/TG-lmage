@@ -82,7 +82,7 @@ const ProfilePage = () => {
             <div className="flex-shrink-0 text-center">
               <div className="w-32 h-40 bg-gray-100 border-2 border-dashed border-gray-300 mx-auto flex items-center justify-center overflow-hidden relative">
                  {formData.avatar ? (
-                   <img src={formData.avatar} alt="Me" className="w-full h-full object-cover" />
+                   <img src={formData.avatar.includes('?') ? formData.avatar : `${formData.avatar}?raw=true`} alt="Me" className="w-full h-full object-cover" />
                  ) : (
                    <User size={64} className="text-gray-300" weight="thin" />
                  )}
