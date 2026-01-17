@@ -8,15 +8,16 @@ import { upload } from '@/utils/request';
  * 上传单个文件（内部方法）
  * @param {File} file - 文件对象
  * @param {number} retries - 重试次数
+ * @param {Function} onProgress - 单文件进度回调
  * @returns {Promise} 上传结果
  */
-const uploadSingleFile = async (file, retries = 3) => {
+const uploadSingleFile = async (file, retries = 3, onProgress) => {
   const formData = new FormData();
   formData.append('file', file);
 
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
-      const response = await upload('/upload', formData);
+      const response = await upload('/upload', formData, onProgress);
       // 后端返回的是数组，取第一个元素
       const result = Array.isArray(response.data) ? response.data[0] : response.data;
       
@@ -51,31 +52,62 @@ const uploadSingleFile = async (file, retries = 3) => {
 /**
  * 并发池控制器（简化版）
  * @param {Array} tasks - 任务数组
+ * @param {Array} files - 文件数组（用于计算总大小）
  * @param {number} concurrency - 并发数
  * @param {Function} onProgress - 进度回调
  * @returns {Promise<Array>} 所有任务结果
  */
-const runWithConcurrency = async (tasks, concurrency, onProgress) => {
+const runWithConcurrency = async (tasks, files, concurrency, onProgress) => {
   const results = [];
   let completed = 0;
   let index = 0;
+  
+  // 计算总大小
+  const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+  let uploadedSize = 0;
+  const fileProgress = new Array(files.length).fill(0);
 
   // 执行单个任务
   const runTask = async () => {
     while (index < tasks.length) {
       const currentIndex = index++;
       const task = tasks[currentIndex];
+      const file = files[currentIndex];
       
       try {
-        const result = await task();
+        const result = await task((percent) => {
+          // 更新当前文件的进度
+          fileProgress[currentIndex] = (file.size * percent) / 100;
+          
+          // 计算总进度
+          const currentTotal = fileProgress.reduce((sum, p) => sum + p, 0);
+          const totalPercent = Math.round((currentTotal / totalSize) * 100);
+          
+          if (onProgress) {
+            onProgress({
+              completed,
+              total: tasks.length,
+              percent: totalPercent,
+              currentIndex,
+              result: null,
+            });
+          }
+        });
+        
         results[currentIndex] = result;
         completed++;
         
+        // 标记该文件已完成
+        fileProgress[currentIndex] = file.size;
+        
         if (onProgress) {
+          const currentTotal = fileProgress.reduce((sum, p) => sum + p, 0);
+          const totalPercent = Math.round((currentTotal / totalSize) * 100);
+          
           onProgress({
             completed,
             total: tasks.length,
-            percent: Math.round((completed / tasks.length) * 100),
+            percent: totalPercent,
             currentIndex,
             result,
           });
@@ -86,6 +118,7 @@ const runWithConcurrency = async (tasks, concurrency, onProgress) => {
           error: error.message || '上传失败'
         };
         completed++;
+        fileProgress[currentIndex] = file.size; // 失败也算完成
       }
     }
   };
@@ -114,10 +147,10 @@ export const uploadFiles = async (files, onProgress, options = {}) => {
 
   try {
     // 创建上传任务数组
-    const tasks = files.map(file => () => uploadSingleFile(file, retries));
+    const tasks = files.map(file => (onFileProgress) => uploadSingleFile(file, retries, onFileProgress));
 
     // 执行并发上传
-    const results = await runWithConcurrency(tasks, concurrency, onProgress);
+    const results = await runWithConcurrency(tasks, files, concurrency, onProgress);
 
     const successResults = results.filter(r => r.success);
     const failedResults = results.filter(r => !r.success);
