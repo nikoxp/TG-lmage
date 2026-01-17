@@ -20,38 +20,30 @@ const HomePage = () => {
   const [uploadProgress, setUploadProgress] = useState({ completed: 0, total: 0, percent: 0 });
 
   const handleUpload = async (files) => {
-    // 立即显示准备状态
+    // 立即显示上传状态并开始上传
     setUploading(true);
     setUploadResults([]);
     setUploadProgress({ completed: 0, total: files.length, percent: 0 });
-    
-    const validFiles = [];
-    for (const file of files) {
-      const validation = validateFile(file, {
-        maxSize: 10 * 1024 * 1024,
-        allowedTypes: ['image/*'],
-      });
-
-      if (!validation.isValid) {
-        toast.error(`${file.name}: ${validation.errors.join(', ')}`);
-        continue;
-      }
-      validFiles.push(file);
-    }
-
-    if (validFiles.length === 0) {
-      setUploading(false);
-      return;
-    }
 
     try {
       const result = await uploadFiles(
-        validFiles,
+        Array.from(files),
         (progress) => setUploadProgress(progress),
         { concurrency: 5, retries: 3 }
       );
 
       if (result.success) {
+        setUploadResults(result.data);
+        toast.success(`搞定！成功添加了 ${result.summary.success} 张涂鸦。`);
+      } else {
+        toast.error(result.error);
+      }
+    } catch (error) {
+      toast.error('出错了，怎么回事？');
+    } finally {
+      setUploading(false);
+    }
+  };
         setUploadResults(result.data);
         toast.success(`搞定！成功添加了 ${result.summary.success} 张涂鸦。`);
       } else {

@@ -12,6 +12,18 @@ import { upload } from '@/utils/request';
  * @returns {Promise} 上传结果
  */
 const uploadSingleFile = async (file, retries = 3, onProgress) => {
+  // 快速验证（不阻塞上传）
+  const maxSize = 10 * 1024 * 1024; // 10MB
+  if (file.size > maxSize) {
+    return {
+      success: false,
+      filename: file.name,
+      size: file.size,
+      type: file.type,
+      error: `文件大小不能超过 ${(maxSize / 1024 / 1024).toFixed(0)}MB`,
+    };
+  }
+
   const formData = new FormData();
   formData.append('file', file);
 
