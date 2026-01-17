@@ -7,8 +7,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        hand: ['"Patrick Hand"', 'cursive'],
-        sans: ['"Patrick Hand"', 'cursive'],
+        hand: ['"Patrick Hand"', '"Ma Shan Zheng"', '"ZCOOL XiaoWei"', 'cursive', 'sans-serif'],
+        sans: ['"Patrick Hand"', '"Ma Shan Zheng"', '"ZCOOL XiaoWei"', 'cursive', 'sans-serif'],
       },
       colors: {
         paper: '#ffffff',

@@ -8,7 +8,7 @@ export function createLoFiPreviewPage(baseUrl, id, rawUrl, downloadUrl) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>涂鸦预览 - Doodle Diary</title>
-    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+    <link href="https://fonts.loli.net/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;

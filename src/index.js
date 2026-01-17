@@ -56,7 +56,11 @@ app.delete('/api/tags/:id', authMiddleware, deleteTag);
 app.post('/api/tags/batch', authMiddleware, batchTagOperation);
 app.get('/api/tags/:id/images', authMiddleware, getTagImages);
 
-// 静态文件服务放在最后，避免覆盖 API 路由
-app.use('/*', serveStatic({ root: './' }));
+// 静态文件服务
+app.use('/assets/*', serveStatic({ root: './' }));
+app.use('/images/*', serveStatic({ root: './' }));
+
+// SPA fallback - 所有其他请求返回 index.html
+app.get('*', serveStatic({ path: './index.html' }));
 
 export default app;
