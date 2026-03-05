@@ -54,7 +54,7 @@ const RegisterPage = () => {
     <div className="w-full">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1">
-          <label className="block text-xl font-hand font-bold text-pencil ml-1 rotate-slight-n1">
+          <label className="block text-xl font-hand font-bold text-pencil dark:text-gray-200 ml-1 rotate-slight-n1">
             起个名字
           </label>
           <input
@@ -69,7 +69,7 @@ const RegisterPage = () => {
         </div>
 
         <div className="space-y-1">
-          <label className="block text-xl font-hand font-bold text-pencil ml-1 rotate-slight-1">
+          <label className="block text-xl font-hand font-bold text-pencil dark:text-gray-200 ml-1 rotate-slight-1">
             邮箱
           </label>
           <input
@@ -84,7 +84,7 @@ const RegisterPage = () => {
         </div>
 
         <div className="space-y-1">
-          <label className="block text-xl font-hand font-bold text-pencil ml-1 rotate-slight-n1">
+          <label className="block text-xl font-hand font-bold text-pencil dark:text-gray-200 ml-1 rotate-slight-n1">
             秘密暗号
           </label>
           <input
@@ -99,7 +99,7 @@ const RegisterPage = () => {
         </div>
 
         <div className="space-y-1">
-          <label className="block text-xl font-hand font-bold text-pencil ml-1 rotate-slight-1">
+          <label className="block text-xl font-hand font-bold text-pencil dark:text-gray-200 ml-1 rotate-slight-1">
             重复暗号
           </label>
           <input
@@ -123,7 +123,7 @@ const RegisterPage = () => {
       </form>
 
       <div className="mt-8 text-center">
-        <p className="font-hand text-lg text-gray-500">
+        <p className="font-hand text-lg text-gray-500 dark:text-gray-400">
           已经有手账了？ <Link to="/login" className="text-marker-blue underline decoration-wavy font-bold hover:text-blue-500">打开它</Link>
         </p>
       </div>

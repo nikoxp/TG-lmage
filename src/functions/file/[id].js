@@ -144,75 +144,99 @@ async function getFilePath(env, fileId) {
     }
 }
 
+// MIME type map for content-type detection
+const MIME_TYPES = {
+    jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+    gif: 'image/gif', webp: 'image/webp', svg: 'image/svg+xml',
+    bmp: 'image/bmp', ico: 'image/x-icon', tiff: 'image/tiff',
+    avif: 'image/avif', heic: 'image/heic', heif: 'image/heif',
+    mp4: 'video/mp4', webm: 'video/webm', mov: 'video/quicktime',
+    mp3: 'audio/mpeg', ogg: 'audio/ogg', wav: 'audio/wav',
+    flac: 'audio/flac', aac: 'audio/aac',
+    pdf: 'application/pdf',
+};
+
+function detectMimeType(extension, fallbackContentType) {
+    if (extension && MIME_TYPES[extension]) {
+        return MIME_TYPES[extension];
+    }
+    return fallbackContentType || 'application/octet-stream';
+}
+
 /**
  * 代理文件请求
- * 直接传递原始文件内容，不进行压缩，确保原图质量
+ * 支持: ETag / 条件请求(304) / Range请求 / 缓存控制 / 内容类型检测
  */
 async function proxyFile(c, fileUrl) {
+    const requestId = c.req.param('id');
+    const originalExtension = requestId.includes('.') ? requestId.split('.').pop().toLowerCase() : '';
+
+    // ETag: 基于文件ID生成稳定的ETag
+    const etag = `"${requestId}"`;
+
+    // 条件请求: 如果客户端发送了 If-None-Match 且匹配，直接返回 304
+    const ifNoneMatch = c.req.header('If-None-Match');
+    if (ifNoneMatch && ifNoneMatch === etag) {
+        return new Response(null, {
+            status: 304,
+            headers: {
+                'ETag': etag,
+                'Cache-Control': 'public, max-age=31536000, immutable',
+            },
+        });
+    }
+
+    // 构建上游请求头（传递 Range 头以支持断点续传）
+    const fetchHeaders = {};
+    const rangeHeader = c.req.header('Range');
+    if (rangeHeader) {
+        fetchHeaders['Range'] = rangeHeader;
+    }
+
     const response = await fetch(fileUrl, {
-        method: c.req.method,
-        headers: c.req.headers
+        method: 'GET',
+        headers: fetchHeaders,
     });
 
-    if (!response.ok) {
+    if (!response.ok && response.status !== 206) {
         return c.text('文件获取失败', response.status);
     }
 
     const headers = new Headers();
-    response.headers.forEach((value, key) => {
-        headers.set(key, value);
-    });
 
-    // 添加缓存控制
-    headers.set('Cache-Control', 'public, max-age=31536000');
-
-    // 确保设置正确的Content-Type，以便浏览器能够预览图片
-    const contentType = response.headers.get('Content-Type');
-    // 从请求ID中获取原始文件扩展名
-    const requestId = c.req.param('id');
-    const originalExtension = requestId.includes('.') ? requestId.split('.').pop().toLowerCase() : '';
-
-    if (contentType) {
-        // 特殊处理：如果原始文件是GIF但Telegram返回的是MP4，保持为video类型但添加特殊标记
-        if (originalExtension === 'gif' && contentType.startsWith('video/')) {
-            headers.set('Content-Type', contentType);
-            headers.set('X-Original-Format', 'gif');
-        } else {
-            headers.set('Content-Type', contentType);
-        }
-    } else {
-        // 根据URL推断内容类型
-        const fileExtension = fileUrl.split('.').pop().toLowerCase();
-
-        if (['jpg', 'jpeg'].includes(fileExtension)) {
-            headers.set('Content-Type', 'image/jpeg');
-        } else if (fileExtension === 'png') {
-            headers.set('Content-Type', 'image/png');
-        } else if (fileExtension === 'gif' || originalExtension === 'gif') {
-            // 如果原始是GIF文件，但实际可能是MP4
-            if (fileExtension === 'mp4' || contentType === 'video/mp4') {
-                headers.set('Content-Type', 'video/mp4');
-                headers.set('X-Original-Format', 'gif');
-            } else {
-                headers.set('Content-Type', 'image/gif');
-            }
-        } else if (fileExtension === 'webp') {
-            headers.set('Content-Type', 'image/webp');
-        } else if (fileExtension === 'svg') {
-            headers.set('Content-Type', 'image/svg+xml');
-        } else if (fileExtension === 'mp4') {
-            headers.set('Content-Type', 'video/mp4');
-        } else {
-            // 默认设置为二进制流
-            headers.set('Content-Type', 'application/octet-stream');
-        }
+    // 复制上游响应头中的关键字段
+    for (const key of ['Content-Length', 'Content-Range', 'Accept-Ranges']) {
+        const val = response.headers.get(key);
+        if (val) headers.set(key, val);
     }
 
-    // 移除Content-Disposition头或设置为inline，确保浏览器预览而不是下载
+    // 缓存控制
+    headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+    headers.set('ETag', etag);
+
+    // 内容类型检测
+    const upstreamContentType = response.headers.get('Content-Type');
+    let contentType = detectMimeType(originalExtension, upstreamContentType);
+
+    // 特殊处理: GIF 文件被 Telegram 转为 MP4
+    if (originalExtension === 'gif' && upstreamContentType?.startsWith('video/')) {
+        contentType = upstreamContentType;
+        headers.set('X-Original-Format', 'gif');
+    }
+
+    headers.set('Content-Type', contentType);
     headers.set('Content-Disposition', 'inline');
 
+    // 安全头
+    headers.set('X-Content-Type-Options', 'nosniff');
+
+    // 如果上游是 Accept-Ranges 但没返回，补上
+    if (!headers.has('Accept-Ranges') && response.status === 200) {
+        headers.set('Accept-Ranges', 'bytes');
+    }
+
     return new Response(response.body, {
-        status: response.status,
-        headers
+        status: response.status, // 200 or 206
+        headers,
     });
 }

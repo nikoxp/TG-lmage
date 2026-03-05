@@ -2,6 +2,17 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
+import {
+  MagnifyingGlassMinus,
+  MagnifyingGlassPlus,
+  ArrowCounterClockwise,
+  ArrowClockwise,
+  ArrowsCounterClockwise,
+  DownloadSimple,
+  X,
+  CaretLeft,
+  CaretRight,
+} from '@phosphor-icons/react';
 
 /**
  * 图片查看器组件 - 支持缩放、旋转、下载等功能
@@ -127,26 +138,26 @@ const ImageViewer = ({ isOpen, images, currentIndex = 0, onClose }) => {
             </div>
             <div className="toolbar-right">
               <button className="toolbar-btn" onClick={handleZoomOut} title="缩小">
-                <i className="ri-zoom-out-line"></i>
+                <MagnifyingGlassMinus size={20} />
               </button>
               <span className="zoom-level">{Math.round(scale * 100)}%</span>
               <button className="toolbar-btn" onClick={handleZoomIn} title="放大">
-                <i className="ri-zoom-in-line"></i>
+                <MagnifyingGlassPlus size={20} />
               </button>
               <button className="toolbar-btn" onClick={handleRotateLeft} title="向左旋转">
-                <i className="ri-anticlockwise-line"></i>
+                <ArrowCounterClockwise size={20} />
               </button>
               <button className="toolbar-btn" onClick={handleRotateRight} title="向右旋转">
-                <i className="ri-clockwise-line"></i>
+                <ArrowClockwise size={20} />
               </button>
               <button className="toolbar-btn" onClick={handleReset} title="重置">
-                <i className="ri-refresh-line"></i>
+                <ArrowsCounterClockwise size={20} />
               </button>
               <button className="toolbar-btn" onClick={handleDownload} title="下载">
-                <i className="ri-download-line"></i>
+                <DownloadSimple size={20} />
               </button>
               <button className="toolbar-btn" onClick={onClose} title="关闭">
-                <i className="ri-close-line"></i>
+                <X size={20} />
               </button>
             </div>
           </div>
@@ -175,14 +186,14 @@ const ImageViewer = ({ isOpen, images, currentIndex = 0, onClose }) => {
                 onClick={handlePrevious}
                 disabled={index === 0}
               >
-                <i className="ri-arrow-left-s-line"></i>
+                <CaretLeft size={32} weight="bold" />
               </button>
               <button
                 className="viewer-nav viewer-nav-next"
                 onClick={handleNext}
                 disabled={index === images.length - 1}
               >
-                <i className="ri-arrow-right-s-line"></i>
+                <CaretRight size={32} weight="bold" />
               </button>
             </>
           )}

@@ -64,7 +64,7 @@ const ProfilePage = () => {
     <div className="max-w-2xl mx-auto animate-in fade-in duration-500">
       
       <div className="mb-8">
-        <h1 className="text-4xl font-hand font-bold text-pencil rotate-slight-1">
+        <h1 className="text-4xl font-hand font-bold text-pencil dark:text-gray-200 rotate-slight-1">
           <IdentificationCard className="inline mr-2" weight="duotone" /> 
           身份证明
         </h1>
@@ -73,14 +73,14 @@ const ProfilePage = () => {
         </p>
       </div>
 
-      <div className="bg-white p-8 shadow-sketch border border-gray-200 relative rotate-slight-1 rounded-sm">
+      <div className="bg-white dark:bg-gray-800 p-8 shadow-sketch border border-gray-200 dark:border-gray-700 relative rotate-slight-1 rounded-sm">
          {/* Tape */}
-         <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-6 bg-white/40 backdrop-blur-sm rotate-2 shadow-tape"></div>
+         <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-6 bg-white/40 dark:bg-gray-600/40 backdrop-blur-sm rotate-2 shadow-tape"></div>
 
          <div className="flex flex-col md:flex-row gap-8">
             {/* Photo Area */}
             <div className="flex-shrink-0 text-center">
-              <div className="w-32 h-40 bg-gray-100 border-2 border-dashed border-gray-300 mx-auto flex items-center justify-center overflow-hidden relative">
+              <div className="w-32 h-40 bg-gray-100 dark:bg-gray-700 border-2 border-dashed border-gray-300 dark:border-gray-600 mx-auto flex items-center justify-center overflow-hidden relative">
                  {formData.avatar ? (
                    <img src={formData.avatar.includes('?') ? formData.avatar : `${formData.avatar}?raw=true`} alt="Me" className="w-full h-full object-cover" />
                  ) : (
@@ -94,7 +94,7 @@ const ProfilePage = () => {
             <div className="flex-1">
                <form onSubmit={handleSubmit} className="space-y-6">
                  <div>
-                   <label className="flex items-center gap-2 font-hand text-lg text-pencil mb-1">
+                   <label className="flex items-center gap-2 font-hand text-lg text-pencil dark:text-gray-200 mb-1">
                      <User /> 姓名 / 代号
                    </label>
                    {isEditing ? (
@@ -106,14 +106,14 @@ const ProfilePage = () => {
                        className="input-hand w-full text-xl font-bold"
                      />
                    ) : (
-                     <div className="text-2xl font-hand font-bold border-b-2 border-transparent px-2 py-1">
+                     <div className="text-2xl font-hand font-bold border-b-2 border-transparent px-2 py-1 dark:text-gray-200">
                        {formData.username}
                      </div>
                    )}
                  </div>
 
                  <div>
-                   <label className="flex items-center gap-2 font-hand text-lg text-pencil mb-1">
+                   <label className="flex items-center gap-2 font-hand text-lg text-pencil dark:text-gray-200 mb-1">
                      <Envelope /> 联系方式
                    </label>
                    {isEditing ? (
@@ -125,14 +125,14 @@ const ProfilePage = () => {
                        className="input-hand w-full text-xl"
                      />
                    ) : (
-                     <div className="text-xl font-hand border-b-2 border-transparent px-2 py-1">
+                     <div className="text-xl font-hand border-b-2 border-transparent px-2 py-1 dark:text-gray-300">
                        {formData.email}
                      </div>
                    )}
                  </div>
 
                  <div>
-                   <label className="flex items-center gap-2 font-hand text-lg text-pencil mb-1">
+                   <label className="flex items-center gap-2 font-hand text-lg text-pencil dark:text-gray-200 mb-1">
                      <Article /> 个人简介
                    </label>
                    {isEditing ? (
@@ -144,13 +144,13 @@ const ProfilePage = () => {
                        rows="3"
                      />
                    ) : (
-                     <div className="text-lg font-hand border-b-2 border-transparent px-2 py-1 italic text-gray-600">
+                     <div className="text-lg font-hand border-b-2 border-transparent px-2 py-1 italic text-gray-600 dark:text-gray-400">
                        {formData.bio || "这家伙很懒，什么都没写。"}
                      </div>
                    )}
                  </div>
 
-                 <div className="pt-4 border-t-2 border-dashed border-gray-200 flex justify-end gap-3">
+                 <div className="pt-4 border-t-2 border-dashed border-gray-200 dark:border-gray-700 flex justify-end gap-3">
                    {isEditing ? (
                      <>
                        <button type="button" onClick={handleCancel} className="btn-doodle text-sm px-4 py-1">

@@ -36,7 +36,7 @@ const LoginPage = () => {
     <div className="w-full">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <label className="block text-xl font-hand font-bold text-pencil ml-1 rotate-slight-n1">
+          <label className="block text-xl font-hand font-bold text-pencil dark:text-gray-200 ml-1 rotate-slight-n1">
             你是谁？
           </label>
           <input
@@ -51,7 +51,7 @@ const LoginPage = () => {
         </div>
 
         <div className="space-y-2">
-          <label className="block text-xl font-hand font-bold text-pencil ml-1 rotate-slight-1">
+          <label className="block text-xl font-hand font-bold text-pencil dark:text-gray-200 ml-1 rotate-slight-1">
             秘密口令
           </label>
           <input
@@ -75,7 +75,7 @@ const LoginPage = () => {
       </form>
 
       <div className="mt-8 text-center">
-        <p className="font-hand text-lg text-gray-500">
+        <p className="font-hand text-lg text-gray-500 dark:text-gray-400">
           第一次来？ <Link to="/register" className="text-marker-blue underline decoration-wavy font-bold hover:text-blue-500">领一本手账</Link>
         </p>
       </div>

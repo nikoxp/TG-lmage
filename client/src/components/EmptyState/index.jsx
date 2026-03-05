@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
-import { HiOutlineInbox } from 'react-icons/hi';
+import { Tray } from '@phosphor-icons/react';
 
 /**
  * 空状态组件 - 用于显示无数据时的提示
  */
 const EmptyState = ({
-  icon: Icon = HiOutlineInbox,
+  icon: Icon = Tray,
   title = '暂无数据',
   description = '',
   action,

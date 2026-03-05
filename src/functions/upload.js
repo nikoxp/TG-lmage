@@ -1,4 +1,3 @@
-import { errorHandling, telemetryData } from "./utils/middleware";
 import { authMiddleware } from "./utils/auth";
 
 // 添加认证中间件包装
@@ -20,12 +19,22 @@ export async function upload(c) {
     try {
         const formData = await c.req.formData();
 
-        await errorHandling(c);
-        telemetryData(c);
-
         const files = formData.getAll('file');
         if (!files || files.length === 0) {
-            throw new Error('未上传文件');
+            return c.json({ error: '未上传文件' }, 400);
+        }
+
+        // 文件类型与大小验证
+        const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+        const ALLOWED_TYPES = ['image/', 'audio/', 'video/'];
+        for (const file of files) {
+            if (!file || !file.type) continue;
+            if (!ALLOWED_TYPES.some(t => file.type.startsWith(t))) {
+                return c.json({ error: `不支持的文件类型: ${file.type}` }, 400);
+            }
+            if (file.size > MAX_FILE_SIZE) {
+                return c.json({ error: `文件 ${file.name} 超过 ${MAX_FILE_SIZE / 1024 / 1024}MB 限制` }, 400);
+            }
         }
 
         const uploadResults = [];
@@ -103,9 +112,14 @@ export async function upload(c) {
             uploadResults.push({ 'src': `/file/${fileKey}` });
         }
 
+        if (uploadResults.length === 0) {
+            return c.json({ error: '所有文件上传失败' }, 500);
+        }
+
         return c.json(uploadResults);
     } catch (error) {
-        return c.json({ error: error.message }, 500);
+        console.error('[Upload Error]', error.message || error);
+        return c.json({ error: '上传处理失败，请稍后重试' }, 500);
     }
 }
 

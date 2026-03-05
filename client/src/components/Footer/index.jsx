@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FiGithub, FiHelpCircle, FiSend } from 'react-icons/fi';
+import { GithubLogo, Question, PaperPlaneTilt } from '@phosphor-icons/react';
 
 /**
  * 底部组件
@@ -20,7 +20,7 @@ const Footer = () => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <FiSend className="footer-icon-inline" />
+              <PaperPlaneTilt className="footer-icon-inline" size={14} />
               Telegram
             </a>{' '}
             提供技术支持
@@ -30,7 +30,7 @@ const Footer = () => {
         {/* 右侧 - 链接 */}
         <div className="footer-right">
           <Link to="/help" className="footer-link">
-            <FiHelpCircle />
+            <Question size={16} />
             帮助文档
           </Link>
           <a
@@ -39,7 +39,7 @@ const Footer = () => {
             rel="noopener noreferrer"
             className="footer-link"
           >
-            <FiGithub />
+            <GithubLogo size={16} />
             GitHub
           </a>
         </div>

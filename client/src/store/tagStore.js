@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import axios from 'axios';
+import request from '@/utils/request';
 
 /**
  * 标签状态管理
@@ -17,7 +17,7 @@ const useTagStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await axios.get('/api/tags');
+      const response = await request.get('/api/tags');
       const { tags } = response.data;
 
       set({
@@ -43,7 +43,7 @@ const useTagStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await axios.post('/api/tags', tagData);
+      const response = await request.post('/api/tags', tagData);
       const { tag } = response.data;
 
       set((state) => ({
@@ -69,7 +69,7 @@ const useTagStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await axios.put(`/api/tags/${tagId}`, tagData);
+      const response = await request.put(`/api/tags/${tagId}`, tagData);
       const { tag } = response.data;
 
       set((state) => ({
@@ -95,7 +95,7 @@ const useTagStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      await axios.delete(`/api/tags/${tagId}`);
+      await request.delete(`/api/tags/${tagId}`);
 
       set((state) => ({
         tags: state.tags.filter((t) => t.id !== tagId),
@@ -120,7 +120,7 @@ const useTagStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      await axios.post('/api/tags/batch', {
+      await request.post('/api/tags/batch', {
         action,
         imageIds,
         tagIds,
@@ -145,7 +145,7 @@ const useTagStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await axios.get(`/api/tags/${tagId}/images`);
+      const response = await request.get(`/api/tags/${tagId}/images`);
       const { images } = response.data;
 
       set({ isLoading: false, error: null });

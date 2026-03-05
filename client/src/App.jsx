@@ -15,10 +15,16 @@ const RegisterPage = lazy(() => import('@/pages/Register'));
 const ProfilePage = lazy(() => import('@/pages/Profile'));
 const SettingsPage = lazy(() => import('@/pages/Settings'));
 const HelpPage = lazy(() => import('@/pages/Help'));
+const StatsPage = lazy(() => import('@/pages/Stats'));
+const AlbumsPage = lazy(() => import('@/pages/Albums'));
+const AlbumDetailPage = lazy(() => import('@/pages/AlbumDetail'));
+const TrashPage = lazy(() => import('@/pages/Trash'));
+const ShareViewPage = lazy(() => import('@/pages/ShareView'));
 const NotFoundPage = lazy(() => import('@/pages/NotFound'));
 
 // Hooks
 import { useAuthStore } from '@/store/authStore';
+import { useThemeStore } from '@/store/themeStore';
 
 // Components
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -33,10 +39,15 @@ const PageLoader = () => (
 
 function App() {
   const { initAuth } = useAuthStore();
+  const { initTheme, setTheme, theme } = useThemeStore();
 
   useEffect(() => {
     initAuth();
-  }, [initAuth]);
+    const cleanup = initTheme();
+    // Apply saved theme on mount
+    setTheme(theme);
+    return cleanup;
+  }, []);
 
   return (
     <>
@@ -54,7 +65,14 @@ function App() {
             <Route path="/tags" element={<ProtectedRoute><TagsPage /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+            <Route path="/stats" element={<ProtectedRoute><StatsPage /></ProtectedRoute>} />
+            <Route path="/albums" element={<ProtectedRoute><AlbumsPage /></ProtectedRoute>} />
+            <Route path="/albums/:id" element={<ProtectedRoute><AlbumDetailPage /></ProtectedRoute>} />
+            <Route path="/trash" element={<ProtectedRoute><TrashPage /></ProtectedRoute>} />
           </Route>
+
+          {/* Public Share View (no layout) */}
+          <Route path="/s/:id" element={<ShareViewPage />} />
 
           {/* Sticky Note Auth Layout */}
           <Route element={<AuthLayout />}>

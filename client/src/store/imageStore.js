@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import axios from 'axios';
+import request from '@/utils/request';
 
 /**
  * 并发控制器 - 限制同时执行的请求数量
@@ -51,6 +51,7 @@ const useImageStore = create((set, get) => ({
   filters: {
     query: '',
     tag: '',
+    type: '',
     sortBy: 'newest',
     viewMode: 'grid',
   },
@@ -58,13 +59,14 @@ const useImageStore = create((set, get) => ({
   // 选择模式
   selectedImages: new Set(),
   isSelectionMode: false,
+  lastSelectedIndex: -1,
 
   // ========== 获取图片列表 ==========
   fetchImages: async (page = 1) => {
     set({ isLoading: true, error: null });
 
     try {
-      const { query, tag } = get().filters;
+      const { query, tag, type } = get().filters;
       const { limit } = get().pagination;
 
       const params = new URLSearchParams({
@@ -74,8 +76,9 @@ const useImageStore = create((set, get) => ({
 
       if (query) params.append('q', query);
       if (tag) params.append('tag', tag);
+      if (type) params.append('type', type);
 
-      const response = await axios.get(`/api/images?${params}`);
+      const response = await request.get(`/api/images?${params}`);
       const { files, pagination } = response.data;
 
       // 映射数据格式
@@ -170,7 +173,7 @@ const useImageStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      await axios.delete(`/api/images/${imageId}`);
+      await request.delete(`/api/images/${imageId}`);
 
       set((state) => ({
         images: state.images.filter((img) => img.id !== imageId),
@@ -190,27 +193,32 @@ const useImageStore = create((set, get) => ({
     }
   },
 
-  // ========== 批量删除图片（带并发限制） ==========
+  // ========== 批量删除图片（使用后端批量接口） ==========
   deleteImages: async (imageIds) => {
     set({ isLoading: true, error: null });
 
     try {
-      // 创建删除任务数组
-      const deleteTasks = imageIds.map((id) => () => axios.delete(`/api/images/${id}`));
+      const ids = Array.isArray(imageIds) ? imageIds : Array.from(imageIds);
+      const response = await request.post('/api/images/batch-delete', { fileIds: ids });
 
-      // 使用并发池执行，最多5个并发请求
-      await runWithConcurrencyLimit(deleteTasks, 5);
+      // 从列表中移除成功删除的
+      const successIds = (response.data?.results || [])
+        .filter(r => r.success)
+        .map(r => r.fileId);
 
-      // 从列表中移除
       set((state) => ({
-        images: state.images.filter((img) => !imageIds.includes(img.id)),
+        images: state.images.filter((img) => !successIds.includes(img.id)),
         selectedImages: new Set(),
         isSelectionMode: false,
         isLoading: false,
         error: null,
       }));
 
-      return { success: true };
+      return {
+        success: true,
+        summary: response.data?.summary,
+        message: response.data?.message,
+      };
     } catch (error) {
       const errorMessage = error.response?.data?.error || '批量删除失败';
       set({
@@ -227,7 +235,7 @@ const useImageStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await axios.put(`/api/images/${imageId}`, data);
+      const response = await request.put(`/api/images/${imageId}`, data);
       const { file } = response.data;
 
       set((state) => ({
@@ -258,16 +266,28 @@ const useImageStore = create((set, get) => ({
     }));
   },
 
-  // ========== 选择/取消选择图片 ==========
-  toggleImageSelection: (imageId) => {
+  // ========== 选择/取消选择图片（支持 Shift 范围选择）==========
+  toggleImageSelection: (imageId, shiftKey = false) => {
     set((state) => {
       const newSelected = new Set(state.selectedImages);
+      const currentIndex = state.images.findIndex(img => img.id === imageId);
+
+      if (shiftKey && state.lastSelectedIndex >= 0 && currentIndex >= 0) {
+        // Shift+click: 选择范围内所有图片
+        const start = Math.min(state.lastSelectedIndex, currentIndex);
+        const end = Math.max(state.lastSelectedIndex, currentIndex);
+        for (let i = start; i <= end; i++) {
+          newSelected.add(state.images[i].id);
+        }
+        return { selectedImages: newSelected, lastSelectedIndex: currentIndex };
+      }
+
       if (newSelected.has(imageId)) {
         newSelected.delete(imageId);
       } else {
         newSelected.add(imageId);
       }
-      return { selectedImages: newSelected };
+      return { selectedImages: newSelected, lastSelectedIndex: currentIndex };
     });
   },
 
@@ -283,6 +303,42 @@ const useImageStore = create((set, get) => ({
         };
       }
     });
+  },
+
+  // ========== 设置类型过滤 ==========
+  setTypeFilter: async (type) => {
+    set((state) => ({
+      filters: { ...state.filters, type },
+      pagination: { ...state.pagination, page: 1 },
+    }));
+    return get().fetchImages(1);
+  },
+
+  // ========== 批量添加标签 ==========
+  batchTagImages: async (imageIds, tags, action = 'add') => {
+    set({ isLoading: true, error: null });
+    try {
+      const ids = Array.isArray(imageIds) ? imageIds : Array.from(imageIds);
+      const response = await request.post('/api/images/batch-tag', { fileIds: ids, tags, action });
+
+      // 刷新列表以获取更新后的数据
+      await get().fetchImages(get().pagination.page);
+
+      set({
+        selectedImages: new Set(),
+        isSelectionMode: false,
+        isLoading: false,
+      });
+
+      return {
+        success: true,
+        message: response.data?.message,
+      };
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || '批量标签操作失败';
+      set({ error: errorMessage, isLoading: false });
+      return { success: false, error: errorMessage };
+    }
   },
 
   // ========== 清空选择 ==========
@@ -310,6 +366,7 @@ const useImageStore = create((set, get) => ({
       filters: {
         query: '',
         tag: '',
+        type: '',
         sortBy: 'newest',
         viewMode: 'grid',
       },

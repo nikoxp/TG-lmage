@@ -1,5 +1,13 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import PropTypes from 'prop-types';
+import {
+  CloudArrowUp,
+  X,
+  CheckCircle,
+  WarningCircle,
+  Trash,
+  CircleNotch,
+} from '@phosphor-icons/react';
 
 /**
  * 上传进度组件 - 显示文件上传进度
@@ -17,12 +25,12 @@ const UploadProgress = ({ files, onCancel, onRemove }) => {
       >
         <div className="upload-progress-header">
           <h4>
-            <i className="ri-upload-cloud-2-line"></i>
+            <CloudArrowUp size={20} className="inline mr-1" />
             上传进度 ({files.filter((f) => f.status === 'done').length}/{files.length})
           </h4>
           {files.some((f) => f.status === 'uploading') && (
             <button className="cancel-all-btn" onClick={onCancel}>
-              <i className="ri-close-line"></i>
+              <X size={16} className="inline mr-1" />
               取消全部
             </button>
           )}
@@ -40,13 +48,13 @@ const UploadProgress = ({ files, onCancel, onRemove }) => {
               {/* 文件图标 */}
               <div className="upload-item-icon">
                 {file.status === 'uploading' && (
-                  <div className="upload-spinner"></div>
+                  <CircleNotch size={20} className="animate-spin text-blue-500" />
                 )}
                 {file.status === 'done' && (
-                  <i className="ri-checkbox-circle-fill success-icon"></i>
+                  <CheckCircle size={20} weight="fill" className="text-green-500" />
                 )}
                 {file.status === 'error' && (
-                  <i className="ri-error-warning-fill error-icon"></i>
+                  <WarningCircle size={20} weight="fill" className="text-red-500" />
                 )}
               </div>
 
@@ -84,7 +92,7 @@ const UploadProgress = ({ files, onCancel, onRemove }) => {
                     onClick={() => onCancel(file.id)}
                     title="取消"
                   >
-                    <i className="ri-close-line"></i>
+                    <X size={16} />
                   </button>
                 )}
                 {(file.status === 'done' || file.status === 'error') && (
@@ -93,7 +101,7 @@ const UploadProgress = ({ files, onCancel, onRemove }) => {
                     onClick={() => onRemove(file.id)}
                     title="移除"
                   >
-                    <i className="ri-delete-bin-line"></i>
+                    <Trash size={16} />
                   </button>
                 )}
               </div>

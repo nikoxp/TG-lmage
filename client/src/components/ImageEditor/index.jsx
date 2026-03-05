@@ -2,6 +2,18 @@ import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
+import {
+  ImageSquare,
+  X,
+  Sun,
+  CircleHalf,
+  Palette,
+  ArrowsCounterClockwise as RotateIcon,
+  MagnifyingGlassPlus,
+  ArrowsCounterClockwise,
+  FloppyDisk,
+  CircleNotch,
+} from '@phosphor-icons/react';
 
 /**
  * 图片编辑器组件 - 支持裁剪、滤镜、调整等功能
@@ -164,11 +176,11 @@ const ImageEditor = ({ isOpen, image, onClose, onSave }) => {
         {/* 头部 */}
         <div className="editor-header">
           <h3>
-            <i className="ri-image-edit-line"></i>
+            <ImageSquare size={20} className="inline mr-1" />
             图片编辑器
           </h3>
           <button className="editor-close" onClick={onClose}>
-            <i className="ri-close-line"></i>
+            <X size={20} />
           </button>
         </div>
 
@@ -205,7 +217,7 @@ const ImageEditor = ({ isOpen, image, onClose, onSave }) => {
               
               <div className="control-item">
                 <label>
-                  <i className="ri-sun-line"></i>
+                  <Sun size={16} className="inline mr-1" />
                   亮度
                   <span>{brightness}%</span>
                 </label>
@@ -221,7 +233,7 @@ const ImageEditor = ({ isOpen, image, onClose, onSave }) => {
 
               <div className="control-item">
                 <label>
-                  <i className="ri-contrast-line"></i>
+                  <CircleHalf size={16} className="inline mr-1" />
                   对比度
                   <span>{contrast}%</span>
                 </label>
@@ -237,7 +249,7 @@ const ImageEditor = ({ isOpen, image, onClose, onSave }) => {
 
               <div className="control-item">
                 <label>
-                  <i className="ri-palette-line"></i>
+                  <Palette size={16} className="inline mr-1" />
                   饱和度
                   <span>{saturation}%</span>
                 </label>
@@ -258,7 +270,7 @@ const ImageEditor = ({ isOpen, image, onClose, onSave }) => {
               
               <div className="control-item">
                 <label>
-                  <i className="ri-rotate-lock-line"></i>
+                  <RotateIcon size={16} className="inline mr-1" />
                   旋转
                   <span>{rotation}°</span>
                 </label>
@@ -274,7 +286,7 @@ const ImageEditor = ({ isOpen, image, onClose, onSave }) => {
 
               <div className="control-item">
                 <label>
-                  <i className="ri-zoom-in-line"></i>
+                  <MagnifyingGlassPlus size={16} className="inline mr-1" />
                   缩放
                   <span>{scale.toFixed(2)}x</span>
                 </label>
@@ -295,7 +307,7 @@ const ImageEditor = ({ isOpen, image, onClose, onSave }) => {
         {/* 底部操作 */}
         <div className="editor-footer">
           <button className="btn btn-outline" onClick={handleReset}>
-            <i className="ri-refresh-line"></i>
+            <ArrowsCounterClockwise size={18} className="inline mr-1" />
             重置
           </button>
           <div className="footer-actions">
@@ -309,12 +321,12 @@ const ImageEditor = ({ isOpen, image, onClose, onSave }) => {
             >
               {isProcessing ? (
                 <>
-                  <div className="btn-spinner"></div>
+                  <CircleNotch size={18} className="inline mr-1 animate-spin" />
                   保存中...
                 </>
               ) : (
                 <>
-                  <i className="ri-save-line"></i>
+                  <FloppyDisk size={18} className="inline mr-1" />
                   保存
                 </>
               )}

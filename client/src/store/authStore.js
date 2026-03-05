@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import axios from 'axios';
+import request from '@/utils/request';
 
 /**
  * 认证状态管理
@@ -17,28 +17,28 @@ const useAuthStore = create(
       error: null,
 
       // ========== 初始化 ==========
-      initAuth: () => {
+      initAuth: async () => {
         const token = get().token;
         const user = get().user;
 
         if (token && user) {
-          // 验证 token 是否过期
           try {
             const payload = JSON.parse(atob(token.split('.')[1]));
             const now = Math.floor(Date.now() / 1000);
 
             if (payload.exp && payload.exp < now) {
-              // Token 已过期，清除状态
               get().logout();
               return false;
             }
 
-            // Token 有效，设置认证状态
             set({ isAuthenticated: true });
-            
-            // 设置 axios 默认请求头
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-            
+
+            // 自动刷新：如果 token 将在 1 天内过期，后台静默刷新
+            const oneDay = 60 * 60 * 24;
+            if (payload.exp && payload.exp - now < oneDay) {
+              get().refreshToken();
+            }
+
             return true;
           } catch (error) {
             console.error('Token 解析失败:', error);
@@ -50,12 +50,29 @@ const useAuthStore = create(
         return false;
       },
 
+      // ========== 刷新令牌 ==========
+      refreshToken: async () => {
+        try {
+          const response = await request.post('/api/auth/refresh');
+          const { token, user } = response.data;
+          set({ token, user, isAuthenticated: true });
+          return true;
+        } catch (error) {
+          // 刷新失败时静默处理，不强制登出
+          console.warn('Token 刷新失败:', error.message);
+          if (error.response?.status === 401) {
+            get().logout();
+          }
+          return false;
+        }
+      },
+
       // ========== 登录 ==========
       login: async (credentials) => {
         set({ isLoading: true, error: null });
 
         try {
-          const response = await axios.post('/api/auth/login', credentials);
+          const response = await request.post('/api/auth/login', credentials);
           const { user, token } = response.data;
 
           // 保存用户信息和 token
@@ -66,9 +83,6 @@ const useAuthStore = create(
             isLoading: false,
             error: null,
           });
-
-          // 设置 axios 默认请求头
-          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
           return { success: true, user };
         } catch (error) {
@@ -87,7 +101,7 @@ const useAuthStore = create(
         set({ isLoading: true, error: null });
 
         try {
-          const response = await axios.post('/api/auth/register', userData);
+          const response = await request.post('/api/auth/register', userData);
           const { user, token } = response.data;
 
           // 保存用户信息和 token
@@ -98,9 +112,6 @@ const useAuthStore = create(
             isLoading: false,
             error: null,
           });
-
-          // 设置 axios 默认请求头
-          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
           return { success: true, user };
         } catch (error) {
@@ -116,9 +127,6 @@ const useAuthStore = create(
 
       // ========== 退出登录 ==========
       logout: () => {
-        // 清除 axios 默认请求头
-        delete axios.defaults.headers.common['Authorization'];
-
         // 清除状态
         set({
           user: null,
@@ -140,7 +148,7 @@ const useAuthStore = create(
         set({ isLoading: true, error: null });
 
         try {
-          const response = await axios.put('/api/auth/profile', profileData);
+          const response = await request.put('/api/auth/profile', profileData);
           const { user } = response.data;
 
           set({
@@ -166,14 +174,17 @@ const useAuthStore = create(
         set({ isLoading: true, error: null });
 
         try {
-          await axios.put('/api/auth/password', {
+          const response = await request.put('/api/auth/password', {
             currentPassword,
             newPassword,
           });
 
+          // 后端返回新 token，保存它
+          const newToken = response.data?.token;
           set({
             isLoading: false,
             error: null,
+            ...(newToken ? { token: newToken } : {}),
           });
 
           return { success: true };
@@ -193,7 +204,7 @@ const useAuthStore = create(
         set({ isLoading: true, error: null });
 
         try {
-          const response = await axios.put('/api/auth/avatar', { avatarUrl });
+          const response = await request.put('/api/auth/avatar', { avatarUrl });
           const { user } = response.data;
 
           set({
@@ -219,7 +230,7 @@ const useAuthStore = create(
         set({ isLoading: true, error: null });
 
         try {
-          const response = await axios.get('/api/auth/user');
+          const response = await request.get('/api/auth/user');
           const { user } = response.data;
 
           set({

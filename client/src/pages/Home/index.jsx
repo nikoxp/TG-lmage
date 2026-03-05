@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import toast from 'react-hot-toast';
 import { uploadFiles } from '@/services/uploadService';
@@ -43,6 +43,32 @@ const HomePage = () => {
       setUploading(false);
     }
   }, []);
+
+  // 粘贴上传支持 (Ctrl+V)
+  useEffect(() => {
+    const handlePaste = (e) => {
+      if (uploading) return;
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      const imageFiles = [];
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          const file = item.getAsFile();
+          if (file) imageFiles.push(file);
+        }
+      }
+
+      if (imageFiles.length > 0) {
+        e.preventDefault();
+        toast.success(`检测到 ${imageFiles.length} 张粘贴图片，开始上传...`);
+        handleUpload(imageFiles);
+      }
+    };
+
+    document.addEventListener('paste', handlePaste);
+    return () => document.removeEventListener('paste', handlePaste);
+  }, [uploading, handleUpload]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: handleUpload,
@@ -97,8 +123,8 @@ const HomePage = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="text-center mb-8">
-        <h2 className="text-4xl font-bold text-pencil rotate-slight-n1">新日记</h2>
-        <p className="text-xl text-gray-500 font-hand mt-2 rotate-slight-1">在这里粘贴你的回忆...</p>
+        <h2 className="text-4xl font-bold text-pencil dark:text-gray-200 rotate-slight-n1">新日记</h2>
+        <p className="text-xl text-gray-500 dark:text-gray-400 font-hand mt-2 rotate-slight-1">在这里粘贴你的回忆... (Ctrl+V 也行！)</p>
       </div>
 
       {/* Upload Zone */}
@@ -107,12 +133,12 @@ const HomePage = () => {
           {...getRootProps()}
           className={`
             border-4 border-dashed rounded-lg p-12 text-center cursor-pointer transition-all duration-300
-            ${isDragActive ? 'border-marker-blue bg-blue-50 scale-105 rotate-1' : 'border-gray-300 hover:border-pencil hover:rotate-slight-1'}
+            ${isDragActive ? 'border-marker-blue bg-blue-50 dark:bg-blue-900/20 scale-105 rotate-1' : 'border-gray-300 dark:border-gray-600 hover:border-pencil dark:hover:border-gray-400 hover:rotate-slight-1'}
           `}
         >
           <input {...getInputProps()} />
           <CloudArrowUp size={64} className={`mx-auto mb-4 ${isDragActive ? 'text-marker-blue' : 'text-gray-400'}`} weight="light" />
-          <p className="text-2xl text-pencil font-bold">
+          <p className="text-2xl text-pencil dark:text-gray-200 font-bold">
             {isDragActive ? '快把照片丢进来！' : '拖拽涂鸦到这里'}
           </p>
           <p className="text-lg text-gray-400 mt-2">或者点击选择</p>
@@ -122,10 +148,10 @@ const HomePage = () => {
       {/* Progress */}
       {uploading && (
         <div className="text-center py-12">
-          <div className="text-3xl font-bold text-pencil mb-4 animate-bounce">
+          <div className="text-3xl font-bold text-pencil dark:text-gray-200 mb-4 animate-bounce">
             正在绘制中... {Math.round(uploadProgress.percent)}%
           </div>
-          <div className="w-full h-4 border-2 border-pencil rounded-full overflow-hidden p-0.5">
+          <div className="w-full h-4 border-2 border-pencil dark:border-gray-500 rounded-full overflow-hidden p-0.5">
             <div
               className="h-full bg-marker-yellow transition-all duration-300 rounded-full"
               style={{ width: `${uploadProgress.percent}%` }}
@@ -137,8 +163,8 @@ const HomePage = () => {
       {/* Results Board */}
       {uploadResults.length > 0 && !uploading && (
         <div className="animate-in fade-in slide-in-from-bottom-8 duration-500">
-          <div className="flex flex-wrap justify-between items-center mb-6 border-b-2 border-dashed border-gray-200 pb-4">
-            <div className="text-2xl font-bold text-pencil">
+          <div className="flex flex-wrap justify-between items-center mb-6 border-b-2 border-dashed border-gray-200 dark:border-gray-700 pb-4">
+            <div className="text-2xl font-bold text-pencil dark:text-gray-200">
               <Check size={32} className="inline text-green-500 mr-2" />
               完成: {successCount}
             </div>
@@ -160,7 +186,7 @@ const HomePage = () => {
               <div
                 key={index}
                 className={`
-                  bg-white p-3 shadow-sketch border border-gray-200 relative transition-transform hover:scale-105 hover:z-10
+                  bg-white dark:bg-gray-800 p-3 shadow-sketch border border-gray-200 dark:border-gray-700 relative transition-transform hover:scale-105 hover:z-10
                   ${index % 2 === 0 ? 'rotate-slight-1' : 'rotate-slight-n2'}
                 `}
               >
@@ -169,7 +195,7 @@ const HomePage = () => {
 
                 {result.success ? (
                   <>
-                    <div className="aspect-video bg-gray-50 overflow-hidden mb-3 border border-gray-100">
+                    <div className="aspect-video bg-gray-50 dark:bg-gray-700 overflow-hidden mb-3 border border-gray-100 dark:border-gray-600">
                       <img
                         src={window.location.origin + result.data.src + '?raw=true'}
                         alt={result.filename}
