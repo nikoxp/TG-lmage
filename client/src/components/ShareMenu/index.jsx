@@ -1,6 +1,15 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
+import {
+  ShareNetwork,
+  X,
+  ShareFat,
+  TwitterLogo,
+  FacebookLogo,
+  TelegramLogo,
+  Copy,
+} from '@phosphor-icons/react';
 
 /**
  * 分享菜单组件
@@ -72,11 +81,11 @@ const ShareMenu = ({ isOpen, onClose, imageUrl, imageTitle = '图片分享' }) =
           >
             <div className="share-menu-header">
               <h3>
-                <i className="ri-share-line"></i>
+                <ShareNetwork size={20} className="inline mr-1" />
                 分享图片
               </h3>
               <button className="share-menu-close" onClick={onClose}>
-                <i className="ri-close-line"></i>
+                <X size={20} />
               </button>
             </div>
 
@@ -85,7 +94,7 @@ const ShareMenu = ({ isOpen, onClose, imageUrl, imageTitle = '图片分享' }) =
               {navigator.share && (
                 <button className="share-item share-native" onClick={handleNativeShare}>
                   <div className="share-icon">
-                    <i className="ri-share-forward-line"></i>
+                    <ShareFat size={24} />
                   </div>
                   <span>系统分享</span>
                 </button>
@@ -94,35 +103,35 @@ const ShareMenu = ({ isOpen, onClose, imageUrl, imageTitle = '图片分享' }) =
               {/* 社交平台 */}
               <button className="share-item" onClick={() => handleShare('twitter')}>
                 <div className="share-icon share-twitter">
-                  <i className="ri-twitter-x-line"></i>
+                  <TwitterLogo size={24} />
                 </div>
                 <span>Twitter</span>
               </button>
 
               <button className="share-item" onClick={() => handleShare('facebook')}>
                 <div className="share-icon share-facebook">
-                  <i className="ri-facebook-line"></i>
+                  <FacebookLogo size={24} />
                 </div>
                 <span>Facebook</span>
               </button>
 
               <button className="share-item" onClick={() => handleShare('telegram')}>
                 <div className="share-icon share-telegram">
-                  <i className="ri-telegram-line"></i>
+                  <TelegramLogo size={24} />
                 </div>
                 <span>Telegram</span>
               </button>
 
               <button className="share-item" onClick={() => handleShare('weibo')}>
                 <div className="share-icon share-weibo">
-                  <i className="ri-weibo-line"></i>
+                  <ShareNetwork size={24} />
                 </div>
                 <span>微博</span>
               </button>
 
               <button className="share-item" onClick={() => handleShare('qq')}>
                 <div className="share-icon share-qq">
-                  <i className="ri-qq-line"></i>
+                  <ShareNetwork size={24} />
                 </div>
                 <span>QQ</span>
               </button>
@@ -130,7 +139,7 @@ const ShareMenu = ({ isOpen, onClose, imageUrl, imageTitle = '图片分享' }) =
               {/* 复制链接 */}
               <button className="share-item" onClick={handleCopyLink}>
                 <div className="share-icon share-copy">
-                  <i className="ri-file-copy-line"></i>
+                  <Copy size={24} />
                 </div>
                 <span>复制链接</span>
               </button>

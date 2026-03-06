@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
+import { CaretLeft, CaretRight } from '@phosphor-icons/react';
 
 /**
  * 分页组件
@@ -86,7 +87,7 @@ const Pagination = ({
         disabled={currentPage === 1}
         aria-label="上一页"
       >
-        <i className="ri-arrow-left-s-line"></i>
+        <CaretLeft size={20} weight="bold" />
       </button>
 
       {/* 页码 */}
@@ -121,7 +122,7 @@ const Pagination = ({
         disabled={currentPage === totalPages}
         aria-label="下一页"
       >
-        <i className="ri-arrow-right-s-line"></i>
+        <CaretRight size={20} weight="bold" />
       </button>
     </motion.div>
   );

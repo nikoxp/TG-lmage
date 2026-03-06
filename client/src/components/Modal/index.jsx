@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PropTypes from 'prop-types';
-import { HiX } from 'react-icons/hi';
+import { X } from '@phosphor-icons/react';
 
 /**
  * 通用模态框组件
@@ -69,7 +69,7 @@ const Modal = ({
                     onClick={onClose}
                     aria-label="关闭"
                   >
-                    <HiX />
+                    <X size={20} />
                   </button>
                 )}
               </div>

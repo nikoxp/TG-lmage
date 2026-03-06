@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import axios from 'axios';
+import request from '@/utils/request';
 
 /**
  * 收藏状态管理
@@ -17,7 +17,7 @@ const useFavoriteStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await axios.get('/api/favorites');
+      const response = await request.get('/api/favorites');
       const { images } = response.data;
 
       const favoriteIds = new Set(images.map((img) => img.id));
@@ -57,7 +57,7 @@ const useFavoriteStore = create((set, get) => ({
     }));
 
     try {
-      await axios.post(`/api/favorites/${imageId}`);
+      await request.post(`/api/favorites/${imageId}`);
       // 成功后不再立即 refetch，保持乐观更新的状态
       // 下次打开收藏页面时会自动同步
       return { success: true };
@@ -89,7 +89,7 @@ const useFavoriteStore = create((set, get) => ({
     });
 
     try {
-      await axios.delete(`/api/favorites/${imageId}`);
+      await request.delete(`/api/favorites/${imageId}`);
       return { success: true };
     } catch (error) {
       // 失败时回滚
@@ -126,7 +126,7 @@ const useFavoriteStore = create((set, get) => ({
     }));
 
     try {
-      await axios.post('/api/favorites/batch', {
+      await request.post('/api/favorites/batch', {
         action: 'add',
         imageIds,
       });
@@ -159,7 +159,7 @@ const useFavoriteStore = create((set, get) => ({
     });
 
     try {
-      await axios.post('/api/favorites/batch', {
+      await request.post('/api/favorites/batch', {
         action: 'remove',
         imageIds,
       });

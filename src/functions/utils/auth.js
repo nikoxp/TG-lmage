@@ -29,11 +29,15 @@ export async function generateToken(payload, env) {
 // 验证JWT令牌
 export async function verifyToken(token, env) {
   try {
-    const [encodedHeader, encodedPayload, signature] = token.split('.');
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      return { valid: false, message: '令牌格式错误' };
+    }
+    const [encodedHeader, encodedPayload, signature] = parts;
     
-    // 验证签名
+    // 验证签名（常量时间比较）
     const expectedSignature = await generateSignature(`${encodedHeader}.${encodedPayload}`, env.JWT_SECRET);
-    if (signature !== expectedSignature) {
+    if (!constantTimeEqual(signature, expectedSignature)) {
       return { valid: false, message: '无效的令牌签名' };
     }
     
@@ -75,20 +79,52 @@ async function generateSignature(data, secret) {
     .replace(/=/g, '');
 }
 
-// 密码哈希函数
-export async function hashPassword(password) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hash = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(hash))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
+// 生成随机盐值
+export function generateSalt(length = 16) {
+  const array = new Uint8Array(length);
+  crypto.getRandomValues(array);
+  return Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// 验证密码
-export async function verifyPassword(password, hashedPassword) {
-  const hash = await hashPassword(password);
-  return hash === hashedPassword;
+// 密码哈希函数（带盐值）
+export async function hashPassword(password, salt) {
+  if (!salt) {
+    salt = generateSalt();
+  }
+  const encoder = new TextEncoder();
+  const data = encoder.encode(salt + password);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  const hashHex = Array.from(new Uint8Array(hash))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+  return `${salt}:${hashHex}`;
+}
+
+// 验证密码（常量时间比较）
+export async function verifyPassword(password, storedHash) {
+  // 兼容旧格式（无盐值）
+  if (!storedHash.includes(':')) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    const hashHex = Array.from(new Uint8Array(hash))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+    return constantTimeEqual(hashHex, storedHash);
+  }
+  const [salt] = storedHash.split(':');
+  const newHash = await hashPassword(password, salt);
+  return constantTimeEqual(newHash, storedHash);
+}
+
+// 常量时间字符串比较（防止时序攻击）
+function constantTimeEqual(a, b) {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
 }
 
 // 认证中间件

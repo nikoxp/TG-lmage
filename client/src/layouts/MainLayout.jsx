@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
+import { KeyboardShortcutsPanel } from '@/components';
 
 /**
  * MainLayout - 主布局组件
@@ -21,7 +22,7 @@ const MainLayout = () => {
           {/* 顶部粘性区域 - Header */}
           <div className="sticky top-0 z-30 px-4 md:px-0 py-3 md:py-0 md:mb-6">
             {/* 半透明背景模拟纸张叠加效果 */}
-            <div className="absolute inset-0 md:hidden bg-gradient-to-b from-[#f8f8f6] via-[#f8f8f6] to-transparent" />
+            <div className="absolute inset-0 md:hidden bg-gradient-to-b from-[#f8f8f6] dark:from-[#1a1a2e] via-[#f8f8f6] dark:via-[#1a1a2e] to-transparent" />
             <div className="relative">
               <Header />
             </div>
@@ -48,11 +49,11 @@ const MainLayout = () => {
               "
             >
               {/* 纸张内边线装饰 */}
-              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent" />
 
               {/* 左侧红线（像真正的笔记本） */}
-              <div className="hidden md:block absolute top-0 bottom-0 left-16 w-px bg-red-200/40" />
+              <div className="hidden md:block absolute top-0 bottom-0 left-16 w-px bg-red-200/40 dark:bg-red-900/30" />
 
               {/* 订书钉装饰 */}
               <div className="staple-top hidden md:block" />
@@ -69,14 +70,14 @@ const MainLayout = () => {
             {/* 纸张阴影层 - 模拟多层纸 */}
             <div
               className="
-                hidden md:block absolute inset-0 bg-white rounded-sm -z-10
+                hidden md:block absolute inset-0 bg-white dark:bg-gray-800 rounded-sm -z-10
                 transform translate-x-1 translate-y-1 rotate-slight-2
                 opacity-60 shadow-sketch
               "
             />
             <div
               className="
-                hidden lg:block absolute inset-0 bg-white rounded-sm -z-20
+                hidden lg:block absolute inset-0 bg-white dark:bg-gray-800 rounded-sm -z-20
                 transform translate-x-2 translate-y-2 -rotate-slight-1
                 opacity-30 shadow-sketch
               "
@@ -89,13 +90,13 @@ const MainLayout = () => {
               {/* 分隔线 */}
               <div className="divider-dashed max-w-xs mx-auto mb-4" />
 
-              <p className="text-pencil-light text-lg rotate-slight-n1 inline-block">
+              <p className="text-pencil-light dark:text-gray-400 text-lg rotate-slight-n1 inline-block">
                 <span className="highlight-yellow">Doodle Diary</span>
                 <span className="mx-2">·</span>
                 <span className="text-base">记录生活的小碎片</span>
               </p>
 
-              <p className="text-gray-400 text-sm mt-2 rotate-slight-1">
+              <p className="text-gray-400 dark:text-gray-500 text-sm mt-2 rotate-slight-1">
                 <span style={{ fontFamily: '"ZCOOL XiaoWei", "Ma Shan Zheng", "Liu Jian Mao Cao", cursive' }}>
                   Handcrafted with ♡ by xiyewuqiu © 2026
                 </span>
@@ -104,6 +105,9 @@ const MainLayout = () => {
           </footer>
         </main>
       </div>
+
+      {/* 快捷键面板 */}
+      <KeyboardShortcutsPanel />
 
       {/* 全局装饰 - 散落的装饰元素 */}
       <div className="fixed bottom-8 left-8 hidden xl:block pointer-events-none opacity-20 rotate-12">

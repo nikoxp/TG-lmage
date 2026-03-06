@@ -75,16 +75,16 @@ const TagsPage = () => {
   const TagModal = ({ title, onSubmit, onClose }) => (
     <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div 
-        className="bg-white p-6 max-w-sm w-full shadow-sketch rotate-slight-1 relative border border-gray-200" 
+        className="bg-white dark:bg-gray-800 p-6 max-w-sm w-full shadow-sketch rotate-slight-1 relative border border-gray-200 dark:border-gray-700" 
         onClick={e => e.stopPropagation()}
       >
          <div className="tape-top"></div>
          
-         <h3 className="text-2xl font-hand font-bold text-pencil mb-6 text-center">{title}</h3>
+         <h3 className="text-2xl font-hand font-bold text-pencil dark:text-gray-200 mb-6 text-center">{title}</h3>
          
          <form onSubmit={onSubmit} className="space-y-4">
            <div>
-             <label className="block font-hand text-lg text-gray-500 mb-1">标签名</label>
+             <label className="block font-hand text-lg text-gray-500 dark:text-gray-400 mb-1">标签名</label>
              <input
                type="text"
                className="input-hand w-full text-xl"
@@ -95,14 +95,14 @@ const TagsPage = () => {
              />
            </div>
            <div>
-             <label className="block font-hand text-lg text-gray-500 mb-1">记号笔颜色</label>
+             <label className="block font-hand text-lg text-gray-500 dark:text-gray-400 mb-1">记号笔颜色</label>
              <div className="flex gap-2 flex-wrap">
                {['#fef08a', '#fbcfe8', '#bae6fd', '#bbf7d0', '#e9d5ff'].map(color => (
                  <button
                    key={color}
                    type="button"
                    onClick={() => setTagColor(color)}
-                   className={`w-8 h-8 rounded-full border-2 transition-transform hover:scale-110 ${tagColor === color ? 'border-pencil scale-110 shadow-sm' : 'border-transparent'}`}
+                   className={`w-8 h-8 rounded-full border-2 transition-transform hover:scale-110 ${tagColor === color ? 'border-pencil dark:border-gray-300 scale-110 shadow-sm' : 'border-transparent'}`}
                    style={{ backgroundColor: color }}
                  />
                ))}
@@ -112,13 +112,13 @@ const TagsPage = () => {
                  onChange={(e) => setTagColor(e.target.value)}
                  className="w-8 h-8 opacity-0 absolute"
                />
-               <button type="button" className="w-8 h-8 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 hover:text-pencil hover:border-pencil">
+               <button type="button" className="w-8 h-8 rounded-full border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center text-gray-400 hover:text-pencil dark:hover:text-gray-200 hover:border-pencil dark:hover:border-gray-400">
                  <Palette size={16} />
                </button>
              </div>
            </div>
            
-           <div className="flex justify-end gap-3 pt-4 border-t-2 border-dashed border-gray-100 mt-6">
+           <div className="flex justify-end gap-3 pt-4 border-t-2 border-dashed border-gray-100 dark:border-gray-700 mt-6">
              <button type="button" onClick={onClose} className="btn-doodle text-sm px-4">
                取消
              </button>
@@ -133,9 +133,9 @@ const TagsPage = () => {
 
   return (
     <div className="animate-in fade-in duration-500">
-      <div className="flex justify-between items-end mb-8 border-b-2 border-dashed border-gray-200 pb-4">
+      <div className="flex justify-between items-end mb-8 border-b-2 border-dashed border-gray-200 dark:border-gray-700 pb-4">
         <div>
-          <h1 className="text-4xl font-hand font-bold text-pencil rotate-slight-1">
+          <h1 className="text-4xl font-hand font-bold text-pencil dark:text-gray-200 rotate-slight-1">
             <Tag className="inline mr-2" weight="duotone" /> 标签
           </h1>
           <p className="text-gray-400 font-hand mt-1 rotate-slight-n1">
@@ -148,10 +148,10 @@ const TagsPage = () => {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-20 font-hand text-xl text-pencil animate-bounce">正在检查软木板...</div>
+        <div className="flex justify-center py-20 font-hand text-xl text-pencil dark:text-gray-200 animate-bounce">正在检查软木板...</div>
       ) : tags.length === 0 ? (
-        <div className="text-center py-20 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50/50">
-           <Tag size={64} className="mx-auto text-gray-300 mb-4" />
+        <div className="text-center py-20 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50/50 dark:bg-gray-800/50">
+           <Tag size={64} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
            <p className="font-hand text-xl text-gray-400">没找到便利贴。</p>
         </div>
       ) : (

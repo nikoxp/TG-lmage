@@ -48,10 +48,12 @@ const useThemeStore = create(
       setTheme: (theme) => {
         set({ theme });
 
-        // 应用主题到 body
+        // 应用 Tailwind dark class 到 html 元素
         if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
           document.body.classList.add('dark-mode');
         } else {
+          document.documentElement.classList.remove('dark');
           document.body.classList.remove('dark-mode');
         }
 
